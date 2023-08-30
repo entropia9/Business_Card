@@ -15,15 +15,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = colorResource(id = R.color.light_green)
                 ) {
                     //Main data and contact info are combined in a column
                     Column(
@@ -87,7 +87,7 @@ fun ShowMainData(
             painter = image,
             contentDescription = null,
             Modifier
-                .background(Color.Black)
+                .background(colorResource(id = R.color.blue))
                 .size(
                     120.dp
                 )
@@ -99,7 +99,8 @@ fun ShowMainData(
         )
         Text(
             text = job,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = colorResource(id = R.color.green)
         )
     }
 
@@ -111,7 +112,8 @@ fun ContactInfo(icon: ImageVector, text: String, modifier: Modifier = Modifier) 
     Row(modifier = modifier) {
         Image(
             imageVector = icon,
-            contentDescription = null
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(colorResource(id = R.color.green))
         )
         Text(text = text, Modifier.padding(start = 10.dp))
     }
