@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,20 +14,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.businesscard.ui.theme.BusinessCardTheme
 import io.github.serpro69.kfaker.Faker
 
@@ -43,26 +44,9 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = colorResource(id = R.color.light_green)
+                    color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    //Main data and contact info are combined in a column
-                    Column(
-                        verticalArrangement = Arrangement.Bottom,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        //fake data generated each time with Faker https://serpro69.github.io/kotlin-faker/
-                        ShowMainData(
-                            name = faker.name.nameWithMiddle(),
-                            job = faker.job.title()
-                        )
-                        ContactInfoColumn(
-                            modifier = Modifier.padding(bottom = 20.dp, top = 200.dp),
-                            phoneNumber = faker.phoneNumber.phoneNumber(),
-                            socialMediaHandle = "@" + faker.pokemon.names(),
-                            email = faker.internet.email()
-                        )
-                    }
+                    BusinessCardApp(faker)
 
                 }
             }
@@ -70,37 +54,70 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun BusinessCardApp(faker: Faker, modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxSize()
+    ) {
+        //fake data generated each time with Faker https://serpro69.github.io/kotlin-faker/
+        val name = faker.name.name()
+        ShowMainData(
+            name = name,
+            job = faker.job.title()
+        )
+        ContactInfoColumn(
+            modifier = Modifier.padding(
+                bottom = dimensionResource(id = R.dimen.padding_large),
+                top = 200.dp
+            ),
+            phoneNumber = faker.phoneNumber.phoneNumber(),
+            socialMediaHandle = "@" + faker.pokemon.names(),
+            email = faker.internet.email(name = name.lowercase())
+        )
+    }
+}
 
 //Displays logo, name and job title in a column
 @Composable
 fun ShowMainData(
     name: String, job: String,
     modifier: Modifier = Modifier,
-    image: Painter = painterResource(id = R.drawable.android_logo)
+    image: Painter = painterResource(id = R.drawable.ic_launcher_foreground)
 ) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium))
     ) {
         Image(
             painter = image,
             contentDescription = null,
             Modifier
-                .background(colorResource(id = R.color.blue))
+                .paint(
+                    painterResource(id = R.drawable.ic_launcher_background),
+                    contentScale = ContentScale.FillBounds
+                )
                 .size(
                     120.dp
                 )
         )
         Text(
             text = name,
-            fontSize = 26.sp,
-            modifier = Modifier.padding(bottom = 10.dp, top = 10.dp)
+            style = MaterialTheme.typography.displayLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(
+                bottom = dimensionResource(id = R.dimen.padding_medium),
+                top = dimensionResource(id = R.dimen.padding_medium)
+            )
         )
         Text(
             text = job,
-            fontWeight = FontWeight.Bold,
-            color = colorResource(id = R.color.green)
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 
@@ -109,13 +126,19 @@ fun ShowMainData(
 // Icon and text combined in a row to avoid duplicating Row in ContactInfoColumn
 @Composable
 fun ContactInfo(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
+    Row(
+        modifier = modifier
+    ) {
         Image(
             imageVector = icon,
             contentDescription = null,
-            colorFilter = ColorFilter.tint(colorResource(id = R.color.green))
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
         )
-        Text(text = text, Modifier.padding(start = 10.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_small))
+        )
     }
 }
 
@@ -147,13 +170,24 @@ fun ContactInfoColumn(
 fun BusinessCardPreview() {
     BusinessCardTheme {
         Column(
-            verticalArrangement = Arrangement.Bottom,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            ShowMainData("Full Name", "Title")
-            ContactInfoColumn(modifier = Modifier.padding(bottom = 20.dp, top = 200.dp))
+            //fake data generated each time with Faker https://serpro69.github.io/kotlin-faker/
+            ShowMainData(
+                name = "faker.name.nameWithMiddle()",
+                job = "faker.job.title()",
+                modifier = Modifier.weight(1f)
+            )
+            ContactInfoColumn(
+                modifier = Modifier.padding(
+                    bottom = dimensionResource(id = R.dimen.padding_large),
+                ),
+                phoneNumber = "faker.phoneNumber.phoneNumber()",
+                socialMediaHandle = "@ + faker.pokemon.names()",
+                email = "faker.internet.email()"
+            )
         }
-
     }
 }
