@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
@@ -18,6 +20,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -30,14 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.businesscard.ui.BusinessCardViewModel
 import com.example.businesscard.ui.theme.BusinessCardTheme
-import io.github.serpro69.kfaker.Faker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val faker = Faker()
 
         setContent {
             BusinessCardTheme {
@@ -46,8 +49,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    BusinessCardApp(faker)
-
+                    BusinessCardApp()
                 }
             }
         }
@@ -55,26 +57,32 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BusinessCardApp(faker: Faker, modifier: Modifier = Modifier) {
+fun BusinessCardApp(
+    modifier: Modifier = Modifier,
+    businessCardViewModel: BusinessCardViewModel = viewModel()
+) {
+    businessCardViewModel.generatePersonalData()
+    val uiState by businessCardViewModel.uiState.collectAsState()
     Column(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
-        //fake data generated each time with Faker https://serpro69.github.io/kotlin-faker/
-        val name = faker.name.name()
+
         ShowMainData(
-            name = name,
-            job = faker.job.title()
+            name = uiState.name,
+            job = uiState.job
         )
         ContactInfoColumn(
             modifier = Modifier.padding(
                 bottom = dimensionResource(id = R.dimen.padding_large),
                 top = 200.dp
             ),
-            phoneNumber = faker.phoneNumber.phoneNumber(),
-            socialMediaHandle = "@" + faker.pokemon.names(),
-            email = faker.internet.email(name = name.lowercase())
+            phoneNumber = uiState.phoneNumber,
+            socialMediaHandle = uiState.socialMediaHandle,
+            email = uiState.email
         )
     }
 }
